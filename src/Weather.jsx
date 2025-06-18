@@ -29,10 +29,14 @@ const WeatherApp = () => {
     }
   };
 
+  // ✅ FIXED: Changed to use /forecast endpoint
   const getDailyForecast = async (coords) => {
-    const apiUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric`;
+    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric`;
     const response = await axios.get(apiUrl);
-    setForecast(response.data.daily.slice(0, 5));
+    const daily = response.data.list.filter((item) =>
+      item.dt_txt.includes("12:00:00")
+    ).slice(0, 5);
+    setForecast(daily);
   };
 
   const handleSubmit = (e) => {
@@ -109,12 +113,12 @@ const WeatherApp = () => {
   return (
     <div className="container mx-auto p-4 font-[Poppins]">
       <div className={`weather-app max-w-[976px] mx-auto bg-blue-700 rounded-3xl p-8 md:p-14 mt-6
-        ${isNight() ? "bg-[url('/images/background-night.png')]" : "bg-[url('/images/background-day.png')]"}
+        ${isNight() ? "bg-[url('/images/background-night.png')]" : "bg-[url('/images/background-day.png')]" }
         bg-center bg-no-repeat bg-cover dark:bg-blue-900`}>
 
         {/* Header */}
         <div className="row header flex flex-wrap pb-12 md:pb-20">
-          <div className="col-md-6 col-12 w-full md:w-1/2 mb-4 md:mb-0">
+          <div className="col-lg-6 col-12 w-full md:w-1/2 mb-4 md:mb-0">
             <h1 id="city-name" className="text-white text-4xl font-medium leading-[44px] mb-2.5">
               {displayedCity}
             </h1>
@@ -123,8 +127,8 @@ const WeatherApp = () => {
             </h2>
           </div>
 
-          <div className="col-md-5 col-12 w-full md:w-5/12 flex items-center mb-4 md:mb-0">
-            <form id="search-form" className="flex w-full" onSubmit={handleSubmit}>
+          <div className="col-lg-6 col-12 w-full md:w-5/12 flex items-center mb-4 md:mb-0">
+            <form id="search-form" className="flex flex-wrap gap-3 w-full" onSubmit={handleSubmit}>
               <input
                 type="search"
                 id="city-input"
@@ -138,32 +142,17 @@ const WeatherApp = () => {
                 type="submit"
                 id="search-button"
                 value="Search"
-                className="ml-[-40px] bg-blue-900 text-white text-sm font-medium rounded-xl h-11 px-6 border-none hover:bg-blue-800"
+                className="ml-[-40px]  bg-blue-900 text-white text-sm font-medium rounded-xl h-11 px-6 border-none hover:bg-blue-800"
               />
             </form>
-          </div>
-
-          <div className="col-md-1 col-3 w-full md:w-1/12 rounded-4xl flex justify-center items-center">
-            <div
-              id="location-button"
-              onClick={getLocation}
-              className="bg-blue-900 text-white w-11 h-11 rounded-4xl border-none ml-1 hover:bg-blue-800 flex items-center justify-center"
-            >
-              <img
-                src="icons/location-light.svg"
-                alt="location icon"
-                id="location-icon"
-                className="w-6 h-6"
-              />
-            </div>
           </div>
         </div>
 
         {/* Weather Body */}
         {weatherData && (
           <div className="row body flex flex-wrap items-center">
-            <div className="col-7 current-weather w-full md:w-7/12 flex items-center">
-              <p id="temperature" className="text-white text-9xl  font-light leading-[100px] m-0 pr-3">
+            <div className="col-md-5 col-12 current-weather w-full md:w-7/12 flex items-center">
+              <p id="temperature" className="text-white text-9xl font-light leading-[100px] m-0 pr-3">
                 {displayTemp()}
               </p>
               <ul className="m-0 mt-6 -ml-3">
@@ -182,22 +171,22 @@ const WeatherApp = () => {
                     °F
                   </button>
                 </li>
-                <li id="weather-description" className="text-white text-xl font-semibold list-none capitalize">
+                <li id="weather-description" className="text-white text-xl font-semibold list-none text-wrap capitalize">
                   {weatherData.weather[0].description}
                 </li>
               </ul>
             </div>
 
-            <div className="col-3 w-full md:w-3/12 -mt-10 md:-mt-16 md:ml-[-12px]">
+            <div className="col-md-5 col-12 w-full md:w-3/12 -mt-10 md:-mt-16 md:ml-[-12px]">
               <img
                 src={`icons/${weatherData.weather[0].icon}.svg`}
                 alt={weatherData.weather[0].description}
                 id="weather-icon"
-                className="w-48 mx-auto"
+                className="w-48 img-fluid mx-auto"
               />
             </div>
 
-            <div className="col-2 w-full md:w-2/12">
+            <div className="col-md-2 col-12 w-full md:w-2/12 flex justify-center ps-4">
               <ul id="weather-info" className="text-white text-sm list-none p-0 mt-5 -ml-6 leading-7">
                 <li className="flex items-center mb-2">
                   <img src="icons/feels-like.svg" alt="feels like" className="icon w-5 h-5 mr-2" />
@@ -215,36 +204,7 @@ const WeatherApp = () => {
             </div>
           </div>
         )}
-
-        {/* Forecast */}
-        <div className="weather-forecast bg-blue-900 bg-opacity-60 mt-12 p-8 rounded-2xl max-h-[210px]" id="forecast">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {forecast.map((day, i) => (
-              <div key={i} className="p-4 bg-white/20 rounded shadow text-center">
-                <h4 className="font-semibold">{formatDay(day.dt)}</h4>
-                <img src={`icons/${day.weather[0].icon}.svg`} alt={day.weather[0].description} className="mx-auto h-12" />
-                <p className="mt-1">
-                  <span className="font-bold">{Math.round(day.temp.max)}°</span> / <span>{Math.round(day.temp.min)}°</span>
-                </p>
-                <p className="text-sm">{day.weather[0].description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
-
-      {/* Footer */}
-      <footer className="text-center text-gray-500 text-xs font-normal mt-6">
-        This project was coded by{" "}
-        <a href="https://nedanaseri.com" className="text-blue-500 hover:underline">
-          Kishore
-        </a>
-        , and is{" "}
-        <a href="https://github.com/nedanaseri/vanilla-weather-app" className="text-blue-500 hover:underline">
-          open-source on GitHub
-        </a>
-        .
-      </footer>
     </div>
   );
 };
