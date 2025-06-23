@@ -2,7 +2,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-image: url('./assets/images/fullpage-bg.png'); /* Adjust path if needed */
+  background-image: url('./assets/images/fullpage-bg.png'); 
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
