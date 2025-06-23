@@ -18,7 +18,6 @@ const getIconUrl = (iconCode) => {
 
 const WeatherApp = () => {
   const [weatherData, setWeatherData] = useState(null);
-  const [forecast, setForecast] = useState([]);
   const [unit, setUnit] = useState("celsius");
   const [cityInput, setCityInput] = useState("chennai");
   const [displayedCity, setDisplayedCity] = useState("chennai");
@@ -55,19 +54,6 @@ const WeatherApp = () => {
     }
   };
 
-  const getLocation = () => {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
-      const response = await axios.get(apiUrl);
-      const data = response.data;
-      celsiusTemp.current = data.main.temp;
-      setWeatherData(data);
-      setDisplayedCity(data.name);
-      setTimezoneOffset(data.timezone);
-      getDailyForecast(data.coord);
-    });
-  };
 
   const formatDate = (timestamp, timezone) => {
     const local = new Date(timestamp * 1000);
@@ -90,10 +76,7 @@ const WeatherApp = () => {
     return `${day}, ${date} ${month} ${year} | ${hourStr}:${minutes} ${ampm}`;
   };
 
-  const formatDay = (timestamp) => {
-    const date = new Date(timestamp * 1000);
-    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
-  };
+ 
 
   const displayTemp = () => {
     if (!celsiusTemp.current) return "--";
@@ -158,10 +141,10 @@ const WeatherApp = () => {
                 {displayTemp()}
               </p>
               <ul className="m-0 mt-6 -ml-3">
-                <li className="text-white text-xl font-light list-none p-0">
+                <li className="text-white text-xl flex gap-2 font-light list-none p-0">
                   <button
                     onClick={() => setUnit("celsius")}
-                    className={`text-white/80 hover:text-white font-medium cursor-pointer mr-1 ${unit === "celsius" ? "text-white" : ""}`}
+                    className={`text-white/80 hover:text-white font-medium cursor-pointer  mr-1 ${unit === "celsius" ? "text-white" : ""}`}
                   >
                     °C
                   </button>
@@ -204,28 +187,6 @@ const WeatherApp = () => {
           </div>
         )}
 
-        {/* Forecast */}
-        {forecast.length > 0 && (
-          <div className="forecast mt-10 text-white">
-            <h3 className="text-xl font-semibold mb-4">5-Day Forecast</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {forecast.map((day, index) => (
-                <div key={index} className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center">
-                  <p className="text-sm font-medium">{formatDay(day.dt)}</p>
-                  <img
-                    src={getIconUrl(day.weather[0].icon)}
-                    alt={day.weather[0].description}
-                    className="mx-auto w-12 h-12 my-2"
-                  />
-                  <p className="text-sm capitalize">{day.weather[0].description}</p>
-                  <p className="text-lg font-bold">
-                    {Math.round(day.temp.max)}° / {Math.round(day.temp.min)}°
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
