@@ -29,14 +29,10 @@ const WeatherApp = () => {
     }
   };
 
-  // ✅ FIXED: Changed to use /forecast endpoint
   const getDailyForecast = async (coords) => {
-    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric`;
+    const apiUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric`;
     const response = await axios.get(apiUrl);
-    const daily = response.data.list.filter((item) =>
-      item.dt_txt.includes("12:00:00")
-    ).slice(0, 5);
-    setForecast(daily);
+    setForecast(response.data.daily.slice(0, 5));
   };
 
   const handleSubmit = (e) => {
@@ -111,9 +107,9 @@ const WeatherApp = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 font-[Poppins]">
+    <div className="container  mx-auto p-4 font-[Poppins]">
       <div className={`weather-app max-w-[976px] mx-auto bg-blue-700 rounded-3xl p-8 md:p-14 mt-6
-        ${isNight() ? "bg-[url('/images/background-night.png')]" : "bg-[url('/images/background-day.png')]" }
+        ${isNight() ? "bg-[url('/images/background-night.png')]" : "bg-[url('/images/background-day.png')]"}
         bg-center bg-no-repeat bg-cover dark:bg-blue-900`}>
 
         {/* Header */}
@@ -146,13 +142,15 @@ const WeatherApp = () => {
               />
             </form>
           </div>
+
+          
         </div>
 
         {/* Weather Body */}
         {weatherData && (
           <div className="row body flex flex-wrap items-center">
             <div className="col-md-5 col-12 current-weather w-full md:w-7/12 flex items-center">
-              <p id="temperature" className="text-white text-9xl font-light leading-[100px] m-0 pr-3">
+              <p id="temperature" className="text-white lg:text-9xl text-7xl   font-light leading-[100px] m-0 pr-3">
                 {displayTemp()}
               </p>
               <ul className="m-0 mt-6 -ml-3">
@@ -204,7 +202,10 @@ const WeatherApp = () => {
             </div>
           </div>
         )}
+
       </div>
+
+      
     </div>
   );
 };
